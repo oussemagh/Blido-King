@@ -1,0 +1,10 @@
+{
+  "name": "blido-king",
+  "version": "1.0.0",
+  "description": "Blido King: static game page plus a small WebSocket room relay for online play",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" },
+  "license": "MIT"
+}
