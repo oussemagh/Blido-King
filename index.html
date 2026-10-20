@@ -113,16 +113,18 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <li>Land on a box to get a random gift. You have two slots: one <b>active</b> gift (you use it) and one <b>passive</b> gift (it works by itself, like 5omsa). If the slot a gift needs is full, the box just vanishes.</li>
 <li>Each player has a gift bar under the board, always visible, with an <b>Active</b> slot and a <b>Passive</b> slot. Tap your Active gift on your turn to use it. The small ✕ throws a gift away.</li>
 <li>If several tokens can use it, they glow: tap the one you want. Tap the gift again to cancel.</li>
+<li>The % next to each gift is its chance per box. If a slot is full, that gift is skipped and the others share its chance.</li>
 <li>Capture a token while your hands are empty and its owner holds a gift: you steal it, slot by slot. If you both hold a gift in the same slot, his is destroyed.</li>
 </ul>
 <h3>The gifts</h3>
-<div class="gi"><span class="gic">🫒</span><div><b>Zit Zitouna</b> <small>20%</small><br>Spills oil on the square of your chosen token. Any token stepping onto it, yours too, slips, flips and stops there even with steps left. One slip per spill.</div></div>
-<div class="gi"><span class="gic">🌶️</span><div><b>Felfel</b> <small>20%</small><br>Burns the opponent token directly in front of yours: he eats the pepper, turns red and returns to his yard. Not on star squares.</div></div>
-<div class="gi"><span class="gic">🫘</span><div><b>Loubia</b> <small>20%</small><br>Gasses the opponent token directly behind yours with a green fart and sends it back to its yard. Not on star squares.</div></div>
-<div class="gi"><span class="gic">🧿</span><div><b>3in</b> <small>10%</small><br>Curses all other players: dice only show 1 to 3 for their next two turns (👁️). A player holding 5omsa is protected and loses it.</div></div>
-<div class="gi"><span class="gic">🪬</span><div><b>5omsa</b> <small>10%</small><br>Passive gift (goes in your passive slot): blocks one 3in, then breaks. While held it also cancels a curse you already have.</div></div>
-<div class="gi"><span class="gic">🧹</span><div><b>Msal7a</b> <small>10%</small><br>From the white lane, beside an opponent token inside his colored lane: sweep him out onto the white-lane square on the opposite side. He loses his lane progress.</div></div>
-<div class="gi"><span class="gic" id="gpile"></span><div><b>Chabb</b> <small>10%</small><br>Blinds the opponent tokens 1 or 2 squares ahead of or behind your token for 3 of their owner’s turns (🕶️). A blind token can’t enter its colored lane: it walks past and makes another full lap.</div></div>
+<div class="gi"><span class="gic">🫒</span><div><b>Zit Zitouna</b> <small data-g="zit"></small><br>Spills oil on the square of your chosen token. Any token stepping onto it, yours too, slips, flips and stops there even with steps left. One slip per spill.</div></div>
+<div class="gi"><span class="gic">🌶️</span><div><b>Felfel</b> <small data-g="felfel"></small><br>Burns the opponent token directly in front of yours: he eats the pepper, turns red and returns to his yard. Not on star squares.</div></div>
+<div class="gi"><span class="gic">🫘</span><div><b>Loubia</b> <small data-g="loubia"></small><br>Gasses the opponent token directly behind yours with a green fart and sends it back to its yard. Not on star squares.</div></div>
+<div class="gi"><span class="gic">🧿</span><div><b>3in</b> <small data-g="eye"></small><br>Curses all other players: dice only show 1 to 3 for their next two turns (👁️). A player holding 5omsa is protected and loses it.</div></div>
+<div class="gi"><span class="gic">🪬</span><div><b>5omsa</b> <small data-g="hand"></small><br>Passive gift (goes in your passive slot): blocks one 3in, then breaks. While held it also cancels a curse you already have.</div></div>
+<div class="gi"><span class="gic">🧹</span><div><b>Msal7a</b> <small data-g="blade"></small><br>From the white lane, beside an opponent token inside his colored lane: sweep him out onto the white-lane square on the opposite side. He loses his lane progress.</div></div>
+<div class="gi"><span class="gic">🩴</span><div><b>Chleka Bou Sbo3</b> <small data-g="chleka"></small><br>Throw it at an opponent token up to 3 squares ahead of one of yours: it can’t move on its next turn and has stars over its head. Not on star squares.</div></div>
+<div class="gi"><span class="gic" id="gpile"></span><div><b>Chabb</b> <small data-g="chabb"></small><br>Blinds the opponent tokens 1 or 2 squares ahead of or behind your token for 3 of their owner’s turns (🕶️). A blind token can’t enter its colored lane: it walks past and makes another full lap.</div></div>
 </div></div>
 <div id="menu"><div class="land">
 <div class="logo">🎲</div>
@@ -220,8 +222,10 @@ const SAFE=new Set([...START,...START.map(s=>(s+8)%52)]);
 const PIPS=[[],[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
 const $=id=>document.getElementById(id),cv=$('c'),g=cv.getContext('2d');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let act=[0,1,2,3],human=[1,1,1,1],tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]),turn=0,dice=0,phase='menu',six=0,mode=0,mv=[],drawn=[[],[],[],[]],gifts=[null,null,null,null],pg=[null,null,null,null],slicks=[],boxes=[],fx=[],rc=0,gl=[],gprev='roll',gEye=false,curse=[0,0,0,0],disp=[[],[],[],[]],hot=null,fart=null,fall=null,kick=null,bub=null,mute=false,EW=0,eyeW=null,zs={z:1,x:300,y:300},zm=null,camT={tx:0,ty:0,z:1},blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],sex=[0,0,0,0],W=0,me=0,pend=false,room=null,nextN=1,inq={},seqN=0,maxN=0,hist=[],seed=1,hostSeat=0,startAt=0,mySex=0,rcode='';
+let act=[0,1,2,3],human=[1,1,1,1],tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]),turn=0,dice=0,phase='menu',six=0,mode=0,mv=[],drawn=[[],[],[],[]],gifts=[null,null,null,null],pg=[null,null,null,null],slicks=[],boxes=[],fx=[],rc=0,gl=[],gprev='roll',gEye=false,curse=[0,0,0,0],disp=[[],[],[],[]],hot=null,fart=null,fall=null,kick=null,bub=null,flip=null,stun=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],mute=false,EW=0,eyeW=null,zs={z:1,x:300,y:300},zm=null,camT={tx:0,ty:0,z:1},blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],sex=[0,0,0,0],W=0,me=0,pend=false,room=null,nextN=1,inq={},seqN=0,maxN=0,hist=[],seed=1,hostSeat=0,startAt=0,mySex=0,rcode='';
 const PASSIVE=['hand'];
+// Chance (in %) of getting each gift from a box. Keep the total at 100. Edit these numbers to rebalance.
+const ODDS={zit:20,felfel:20,loubia:20,eye:10,hand:9,blade:7,chabb:7,chleka:7};
 const FELFEL_LINE='نحكلك فمك بالفلفل',LOUBIA_LINE='كرشي تهرات باللوبيا',EYE_LINE='حااااالة معاكم';
 let AC=null;
 function ac(){return AC||(AC=new(window.AudioContext||window.webkitAudioContext)())}
@@ -294,7 +298,7 @@ function zoomOn(x,y,ms,z=1.5){if(zs.z<1.03){zs.x=x*CS;zs.y=y*CS}zm={x,y,until:pe
 const cz=j=>curse[j]>0&&pg[j]!='hand';
 const rnd=()=>{seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296};
 const mine=i=>mode!=3||i==me;
-const GK=['zit','felfel','loubia','eye','hand','blade','chabb'],PILE='<svg viewBox="0 0 32 32" style="width:78%;height:78%"><path d="M3 27C7 26 10 24 12 20C14 14 15 10 16 7C17 10 18 14 20 20C22 24 25 26 29 27Z" fill="#fafafa" stroke="#8c929c" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="24" r="1" fill="#c9ced6"/><circle cx="20" cy="23" r="1" fill="#c9ced6"/><circle cx="16" cy="17" r="1" fill="#c9ced6"/></svg>',GW=[2,2,2,1,1,1,1],pickGift=i=>{const c=GK.map((k,n)=>[k,GW[n]]).filter(([k])=>PASSIVE.includes(k)?!pg[i]:!gifts[i]);if(!c.length)return null;let r=rnd()*c.reduce((a,[,w])=>a+w,0);for(const[k,w]of c){if((r-=w)<0)return k}return c[0][0]},GI={chabb:'⚪',blade:'🧹',hand:'🪬',eye:'🧿',zit:'🫒',felfel:'🌶️',loubia:'🫘'},GN={chabb:'Chabb',blade:'Msal7a',hand:'5omsa',eye:'3in',zit:'Zit Zitouna',felfel:'Felfel',loubia:'Loubia'};
+const GK=['zit','felfel','loubia','eye','hand','blade','chabb','chleka'],PILE='<svg viewBox="0 0 32 32" style="width:78%;height:78%"><path d="M3 27C7 26 10 24 12 20C14 14 15 10 16 7C17 10 18 14 20 20C22 24 25 26 29 27Z" fill="#fafafa" stroke="#8c929c" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="24" r="1" fill="#c9ced6"/><circle cx="20" cy="23" r="1" fill="#c9ced6"/><circle cx="16" cy="17" r="1" fill="#c9ced6"/></svg>',GW=GK.map(k=>ODDS[k]),pickGift=i=>{const c=GK.map((k,n)=>[k,GW[n]]).filter(([k])=>PASSIVE.includes(k)?!pg[i]:!gifts[i]);if(!c.length)return null;let r=rnd()*c.reduce((a,[,w])=>a+w,0);for(const[k,w]of c){if((r-=w)<0)return k}return c[0][0]},GI={chleka:'🩴',chabb:'⚪',blade:'🧹',hand:'🪬',eye:'🧿',zit:'🫒',felfel:'🌶️',loubia:'🫘'},GN={chleka:'Chleka Bou Sbo3',chabb:'Chabb',blade:'Msal7a',hand:'5omsa',eye:'3in',zit:'Zit Zitouna',felfel:'Felfel',loubia:'Loubia'};
 const gs=[],gx=[],ps=[],px=[],gcs=[];
 for(let i=0;i<4;i++){
   const card=document.createElement('div');card.className='gc';card.style.setProperty('--pc',COL[i]);
@@ -479,10 +483,15 @@ function draw(time){
     }
     
     
+    if(stun[o.i][o.t]>0){g.font=`${Math.round(r*.62)}px sans-serif`;for(let k=0;k<3;k++){const an=time/220+k*2.094;g.fillText('⭐',px+Math.cos(an)*r*.85,py+lift-r*1.45+Math.sin(an)*r*.28)}}
     if(blind[o.i][o.t]>0){g.font=`${Math.round(r*1.1)}px sans-serif`;g.fillText('🕶️',px,py+lift-r*.52)}
     if(bub&&time<bub.until&&bub.i==o.i&&bub.t==o.t)drawBub(px,py+lift,r,bub.text);
     if(cz(o.i)){g.font='18px sans-serif';g.fillText('👁️',px+r*.7,py-r*.7)}
     
+  }
+  if(flip&&time-flip.t0<flip.dur){
+    const u=Math.min(1,(time-flip.t0)/flip.dur),x=(flip.a[0]+(flip.b[0]-flip.a[0])*u)*CS,y=(flip.a[1]+(flip.b[1]-flip.a[1])*u)*CS-Math.sin(Math.PI*u)*34;
+    g.save();g.translate(x,y);g.rotate(u*14);g.font='26px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('🩴',0,0);g.restore();
   }
 }
 requestAnimationFrame(function f(t){draw(t);requestAnimationFrame(f)});
@@ -494,7 +503,7 @@ function ui(){
   for(let i=0;i<4;i++){const h=act.includes(i)&&pg[i];gcs[i].style.display=act.includes(i)?'':'none';gcs[i].classList.toggle('on',phase!='menu'&&act.includes(i)&&i==cur());ps[i].classList.toggle('has',!!h);ps[i].textContent=h?GI[h]:'';ps[i].title=h?GN[h]+' (passive)':'';px[i].style.display=h&&human[i]?'block':'none'}
   $('die').classList.toggle('can',phase=='roll'&&human[cur()]&&mine(cur()));
 }
-const movable=(i,d)=>[0,1,2,3].filter(t=>{const p=tok[i][t];return p<0?d==6:p==57||(p<56&&p+d<=56)});
+const movable=(i,d)=>[0,1,2,3].filter(t=>{const p=tok[i][t];if(stun[i][t]>0)return false;return p<0?d==6:p==57||(p<56&&p+d<=56)});
 function bot(i){
   let best=mv[0],bs=-1e9;
   for(const t of mv){
@@ -599,7 +608,7 @@ function tapGift(i){
 }
 function gcands(i,gk){
   return[0,1,2,3].filter(t=>{
-    const p=tok[i][t];if(gk=='blade')return !!bladeTarget(i,t);if(gk=='chabb')return chabbV(i,t).length>0;if(p<0||p>50)return false;
+    const p=tok[i][t];if(gk=='blade')return !!bladeTarget(i,t);if(gk=='chabb')return chabbV(i,t).length>0;if(gk=='chleka')return !!slipTarget(i,t);if(p<0||p>50)return false;
     if(gk=='zit'){const c=(START[i]+p)%52;return !SAFE.has(c)&&!slicks.includes(c)}
     const T=targets(i,t);return gk=='felfel'?!!(T.ahead&&T.ahead.d==1):!!(T.behind&&T.behind.d==1);
   });
@@ -629,6 +638,16 @@ function chabbV(i,t){
   }
   return v;
 }
+function slipTarget(i,t){
+  const p=tok[i][t];if(p<0||p>50)return null;
+  const a=ab(i,p);let best=null;
+  for(const j of act)if(j!=i)for(let s=0;s<4;s++){
+    const q=tok[j][s];if(q<0||(q>50&&q!=57)||stun[j][s]>0)continue;
+    const b=ab(j,q),f=(b-a+52)%52;
+    if(f>=1&&f<=3&&f<=50-p&&!SAFE.has(b)&&(!best||f<best.d))best={j,s,d:f};
+  }
+  return best;
+}
 async function useGift(i,isBot,tt,vj){
   const gk=gifts[i];if(!gk||gk=='hand')return false;
   const T=targets(i,tt);let ok=false,vic=-1;
@@ -653,6 +672,20 @@ async function useGift(i,isBot,tt,vj){
   }else if(gk=='chabb'){
     const u=[...new Set((tt!=null?chabbV(i,tt):[0,1,2,3].flatMap(t=>chabbV(i,t))).map(([j,s])=>j*4+s))].map(k=>[k>>2,k&3]);
     if(u.length){u.forEach(([j,s])=>blind[j][s]=3);ok=true;{const q0=cellXY(u[0][0],tok[u[0][0]][u[0][1]]);zoomOn(q0[0],q0[1],1000)}say(`⚪ Chabb! ${[...new Set(u.map(([j])=>NM[j]))].join(', ')}: ${u.length} token${u.length>1?'s':''} blinded for 3 turns, can’t enter the colored lane`)}
+  }else if(gk=='chleka'){
+    let pk=null;
+    for(const t of(tt!=null?[tt]:[0,1,2,3])){const x=slipTarget(i,t);if(x&&(!pk||x.d<pk.d))pk={...x,t}}
+    if(pk){
+      const ph0=phase;phase='busy';gifts[i]=null;ui();
+      const A=cellXY(i,tok[i][pk.t]),B=cellXY(pk.j,tok[pk.j][pk.s]);
+      flip={a:A,b:B,t0:performance.now(),dur:650};
+      zoomOn((A[0]+B[0])/2,(A[1]+B[1])/2,1800);
+      say(`🩴 Chleka Bou Sbo3! A ${NM[pk.j]} token is hit and can’t move next turn`);
+      await sleep(650);
+      stun[pk.j][pk.s]=1;fx=[{x:B[0],y:B[1],e:'💥',u:performance.now()+600}];flip=null;
+      await sleep(900);
+      phase=ph0;ok=true;
+    }
   }else if(gk=='blade'){
     const m=tt!=null?bladeTarget(i,tt):[0,1,2,3].map(t=>bladeTarget(i,t)).find(Boolean);
     if(m){
@@ -704,7 +737,7 @@ function spawnBoxes(){
 function next(extra){let sp=false;
   if(!extra){
     
-    if(curse[cur()]>0)curse[cur()]--;blind[cur()]=blind[cur()].map(v=>v>0?v-1:0);turn=(turn+1)%act.length;six=0;
+    if(curse[cur()]>0)curse[cur()]--;blind[cur()]=blind[cur()].map(v=>v>0?v-1:0);stun[cur()]=stun[cur()].map(v=>v>0?v-1:0);turn=(turn+1)%act.length;six=0;
     if(turn==0&&++rc>0&&rc%4==0){spawnBoxes();sp=true}
   }
   phase='roll';ui();
@@ -720,7 +753,7 @@ function win(i){
   $('menu').classList.remove('hide');
 }
 function resetState(){
-  tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]);turn=act.length-1;six=0;mv=[];showDie(0);gifts=[null,null,null,null];pg=[null,null,null,null];curse=[0,0,0,0];blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];bags=[[],[],[],[]];slicks=[];boxes=[];fx=[];rc=-1;pend=false;nextN=1;if(mode!=3)inq={};
+  tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]);turn=act.length-1;six=0;mv=[];showDie(0);gifts=[null,null,null,null];pg=[null,null,null,null];curse=[0,0,0,0];blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];bags=[[],[],[],[]];slicks=[];boxes=[];fx=[];rc=-1;pend=false;stun=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];flip=null;nextN=1;if(mode!=3)inq={};
 }
 function start(m){
   leaveRoom();
@@ -853,6 +886,7 @@ cv.addEventListener('click',e=>{
   if(b!=null){if(phase=='gpick'){phase=gprev;gl=[];if(gEye){gEye=false;sendAct({t:'gift',p:i,vj:b})}else sendAct({t:'gift',p:i,tt:b})}else sendAct({t:'move',p:i,k:b})}
 });
 $('gpile').innerHTML=PILE;
+document.querySelectorAll('[data-g]').forEach(e=>{e.textContent=ODDS[e.dataset.g]+'%'});
 const gclose=()=>$('gm').classList.add('hide');
 $('sn').onclick=()=>{mute=!mute;$('sn').textContent=mute?'🔇':'🔊';if(mute)try{speechSynthesis.cancel()}catch(e){}};
 $('lg').onclick=()=>$('gm').classList.remove('hide');
