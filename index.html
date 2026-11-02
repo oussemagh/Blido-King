@@ -38,7 +38,7 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 .mb{direction:rtl;display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.1);color:#fff;border:2px solid rgba(255,255,255,.22);text-align:right;font-size:17px}
 .mb i{font-style:normal;font-size:30px;width:38px;text-align:center}
 .mb b{display:block}
-.mb small{display:block;font-weight:600;opacity:.75;font-size:12px}
+.mb small{display:block;font-weight:600;opacity:.75;font-size:12px;direction:ltr;text-align:right}
 .mb:hover{background:rgba(255,255,255,.18)}
 #onl{background:linear-gradient(90deg,#ffb300,#ff8f00);color:#2a1a6e;border-color:transparent}
 .or{margin:12px 0 8px;color:#cfcaff;font-weight:700;font-size:13px}
@@ -50,6 +50,12 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 .pr i{width:14px;height:14px;border-radius:50%;display:inline-block}
 #lmsg{min-height:20px;color:#ffe08a;font-weight:700;font-size:14px}
 .ghost{background:transparent;color:#cfcaff;margin-top:6px}
+#nsel{display:flex;gap:10px;justify-content:center;margin:6px 0 10px}
+.nb{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;border:3px solid rgba(255,255,255,.35);font-size:22px;font-weight:900;padding:0}
+.nb.on{background:#ffb300;color:#2a1a6e;border-color:#fff}
+.nb:disabled{opacity:.65}
+#bye{position:fixed;inset:0;background:radial-gradient(circle at 25% 15%,#4b36a3,#1d1b3a 68%);display:flex;align-items:center;justify-content:center;z-index:9;color:#fff;text-align:center}
+#bye.hide{display:none}
 #menu.hide{display:none}
 .box{background:var(--card);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:10px;text-align:center;min-width:250px}
 .box h2{margin:0;font-size:26px}
@@ -135,6 +141,7 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <div id="bw"><canvas id="c" width="1200" height="1200"></canvas><div id="dw"><div id="die"></div></div></div>
 <div id="gb" class="gbar"></div>
 <button id="sn" type="button" aria-label="Sound">🔊</button>
+<div id="bye" class="hide"><div class="land"><div class="logo">👋</div><h2>يعطيك الصحة</h2><button id="byeb" type="button">ارجع للعبة</button></div></div>
 <div id="rk" class="hide"><div class="rbox" role="dialog" aria-label="الترتيب"><h2>🏆 الترتيب</h2><div id="rkl"></div><button id="rkb" type="button">إرجع</button></div></div>
 <div id="gm" class="hide"><div class="gbox" role="dialog" aria-label="قانون اللعبة">
 <div class="ghd"><h2>🎁 قانون اللعبة</h2><button id="gc" type="button" aria-label="Close">✕</button></div>
@@ -146,7 +153,7 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <li>كان تنجم تستعمل الهدية بأكثر من بيدق، البيادق يضوّيو بالبنفسجي: دوس على البيدق إلي تحب، ولا دوس على الهدية مرة أخرى باش ترجع.</li>
 <li>كل هدية عندها حظها: <b>موجود برشا</b> ولا <b>كل واحد وزهرو</b>. كان الهدية إلي طلعتلك بلاصتها عامرة، الصندوق يمشي.</li>
 <li>كي تاكل بيدق وإيدك فارغة وصاحبو عندو هدية، تسرقها. وكان زوز عندكم هدية في نفس البلاصة، هديتو تتحرق.</li>
-<li>كي يكونو زوز بيادق من نفس اللاعب في نفس البلاصة (موش على نجمة) وواحد آخر يحط عليهم، يتكتلوا عليه ويموت.</li>
+<li>كي يكونو زوز بيادق من نفس اللاعب في نفس البلاصة (موش على نجمة) وواحد آخر يحط عليهم، يتكتلوا عليه ويموت. أما كان واحد منهم مدوّخ (شلاكة) ولا كانو عميان (شب)، ما يتكتلوش: البيدق إلي حط يضرب واحد بعد واحد، الأول إلي موش مدوّخ وبعدو المدوّخ.</li>
 <li>اللعبة ما توفاش كي واحد يربح: الباقين يكملو على الترتيب، وتوفى كي يبقى لاعب وحيد ما ربحش، وساعتها تطلع لائحة الترتيب.</li>
 <li>كي يولّي عند لاعب 3 بيادق في الطريق الملون، يبان سهم على البيدق الأخير باش الكل يركّز معاه.</li>
 </ul>
@@ -154,7 +161,7 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <div class="gi"><span class="gic">🫒</span><div><b>زيت زيتونة</b> <span class="lat">zit zitouna</span> <small data-g="zit"></small><br>تصبّ الزيت في بلاصة البيدق إلي تختارو. أي بيدق يحط عليها، حتى متاعك، يتزلق ويوقف في بلاصتو ولو بقاتلو خطوات. الزيت يخدم مرة وحدة.</div></div>
 <div class="gi"><span class="gic">🌶️</span><div><b>فلفل</b> <span class="lat">felfel</span> <small data-g="felfel"></small><br>تحرق البيدق إلي قدام بيدقك مباشرة: ياكل الفلفل، يحمرّ وجهو ويرجع لبيتو. ما تخدمش على النجوم.</div></div>
 <div class="gi"><span class="gic">🫘</span><div><b>لوبية</b> <span class="lat">loubiya</span> <small data-g="loubia"></small><br>تضرب البيدق إلي وراء بيدقك مباشرة بالريح الأخضر ويرجع لبيتو. ما تخدمش على النجوم.</div></div>
-<div class="gi"><span class="gic">🧿</span><div><b>عين</b> <span class="lat">3in</span> <small data-g="eye"></small><br>العين على كل اللاعبين الآخرين: الزهر يطلعلهم غير من 1 لـ 3 في دورتين (👁️). إلي عندو خمسة ما تصيبوش، والخمسة تتكسر.</div></div>
+<div class="gi"><span class="gic">🧿</span><div><b>عين</b> <span class="lat">3in</span> <small data-g="eye"></small><br>العين على كل اللاعبين الآخرين: الزهر يطلعلهم غير من 1 لـ 3 في دورتين (👁️). إلي عندو خمسة ما تصيبوش، والخمسة تتكسر. واللي يرميها هو ما تصيبوش.</div></div>
 <div class="gi"><span class="gic">🪬</span><div><b>خمسة</b> <span class="lat">5omsa</span> <small data-g="hand"></small><br>هدية تخدم وحدها (في البلاصة الثانية): تردّ عين وحدة وبعد تتكسر. وكان عندك عين على راسك، تتنحّى كيما تكون الخمسة عندك.</div></div>
 <div class="gi"><span class="gic">🧹</span><div><b>مصلحة</b> <span class="lat">msal7a</span> <small data-g="blade"></small><br>تنجم تستعملها في أي بلاصة: تدفع البيدق إلي قدام بيدقك مباشرة بخطوة لقدام، حتى كان هو على نجمة. وكان هو في الطريق الملون متاعو وإنت جنبو في الطريق الأبيض، تهزّو للجهة الأخرى ويضيع تقدمو.</div></div>
 <div class="gi"><span class="gic">🩴</span><div><b>شلاكة بو صبع</b> <span class="lat">chleka bou sbo3</span> <small data-g="chleka"></small><br>ترميها على بيدق من الخصم بعيد عليك من 1 لـ 3 خطوات قدام: يدوخ (نجوم فوق راسو) وما يتحركش في دورتو الجاية. ما تخدمش على النجوم.</div></div>
@@ -168,14 +175,14 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <div class="or" style="margin-top:0">الشخصيات</div>
 <div id="cs"></div>
 <div class="modes">
-<button class="mb" data-m="0"><i>🤖</i><span><b>راسك راس الماكينة</b></span></button>
-<button class="mb" data-m="1"><i>🎯</i><span><b>راسك راس 3 ماكينات</b></span></button>
-<button class="mb" data-m="4"><i>🤝</i><span><b>العبوا 2 في نفس التاليفون</b></span></button>
-<button class="mb" data-m="2"><i>👥</i><span><b>العبوا 4 في نفس التاليفون</b></span></button>
+<button class="mb" id="bM" type="button"><i>🤖</i><span><b>تلعب مع الماكينة</b><small>tal3eb m3a el makina</small></span></button>
+<button class="mb" id="bF" type="button"><i>👥</i><span><b>تلعبو فرد تليفون</b><small>tal3ebou fard talifoun</small></span></button>
+<button class="mb" id="onl" type="button"><i>🌐</i><span><b>تلعبو كل واحد في تليفونو</b><small>tal3bou kol wa7ed fi talifounou</small></span></button>
 <button class="mb" id="lg2" type="button"><i>🎁</i><span><b>قانون اللعبة</b></span></button>
-<button class="mb" id="onl"><i>🌐</i><span><b>العبوا كل واحد في تليفونو</b></span></button>
+<button class="mb" id="ex" type="button"><i>🚪</i><span><b>خروج</b><small>5ourouj</small></span></button>
 </div>
 </div>
+<div id="sub" class="hide"><div class="or" id="subt"></div><div class="modes" id="subb"></div><button id="subback" class="ghost" type="button">إرجع</button></div>
 <div id="lob" class="hide">
 <div id="l1">
 <button class="mb" id="mk"><i>➕</i><span><b>لمة جديدة, إصنع كود جديد</b></span></button>
@@ -183,11 +190,12 @@ button:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
 <div class="jrow"><input id="cd" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Room code"><button id="jn">أخلط عليهم</button></div>
 </div>
 <div id="l2" class="hide">
-<div class="or">ROOM CODE</div><div id="rc"></div>
+<div class="or">كود اللمة</div><div id="rc"></div>
 <div id="pl"></div>
-<button id="inv" class="ch" type="button">📋 Copy invite</button>
+<button id="inv" class="ch" type="button">📋 انسخ الدعوة</button>
 <div id="mysex"></div>
-<button id="go" type="button">Start game</button>
+<div class="or">عدد اللاعبين</div>
+<div id="nsel"></div>
 </div>
 <p id="lmsg"></p>
 <button id="lback" class="ghost" type="button">إرجع</button>
@@ -258,7 +266,7 @@ const SAFE=new Set([...START,...START.map(s=>(s+8)%52)]);
 const PIPS=[[],[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
 const $=id=>document.getElementById(id),cv=$('c'),g=cv.getContext('2d');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let act=[0,1,2,3],human=[1,1,1,1],tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]),turn=0,dice=0,phase='menu',six=0,mode=0,mv=[],drawn=[[],[],[],[]],gifts=[null,null,null,null],pg=[null,null,null,null],slicks=[],boxes=[],fx=[],rc=0,gl=[],gprev='roll',gEye=false,curse=[0,0,0,0],disp=[[],[],[],[]],hot=null,fart=null,fall=null,kick=null,bub=null,bub2=null,UK=1,finished=[],warn=[0,0,0,0],warned=[false,false,false,false],brawl=null,flip=null,stun=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],mute=false,EW=0,eyeW=null,zs={z:1,x:300,y:300},zm=null,camT={tx:0,ty:0,z:1},blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],sex=[0,0,0,0],W=0,me=0,pend=false,room=null,nextN=1,inq={},seqN=0,maxN=0,hist=[],seed=1,hostSeat=0,startAt=0,mySex=0,rcode='';
+let act=[0,1,2,3],human=[1,1,1,1],tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]),turn=0,dice=0,phase='menu',six=0,mode=0,mv=[],drawn=[[],[],[],[]],gifts=[null,null,null,null],pg=[null,null,null,null],slicks=[],boxes=[],fx=[],rc=0,gl=[],gprev='roll',gEye=false,curse=[0,0,0,0],disp=[[],[],[],[]],hot=null,fart=null,fall=null,kick=null,bub=null,bub2=null,UK=1,finished=[],warn=[0,0,0,0],warned=[false,false,false,false],brawl=null,flip=null,stun=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],mute=false,EW=0,eyeW=null,zs={z:1,x:300,y:300},zm=null,camT={tx:0,ty:0,z:1},blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]],sex=[0,0,0,0],W=0,me=0,pend=false,room=null,nextN=1,inq={},seqN=0,maxN=0,hist=[],seed=1,hostSeat=0,startAt=0,mySex=0,rcode='',startSent=false;
 const PASSIVE=['hand'];
 function killTok(j,s){tok[j][s]=-1;blind[j][s]=0;stun[j][s]=0}
 // Name shown under each gift slot: [Arabic, latin]
@@ -408,11 +416,17 @@ function updWarn(){
   }
 }
 function blockOn(i,a){
+  const groups=[];
   for(const j of act)if(j!=i){
     const ss=[];for(let s=0;s<4;s++){const q=tok[j][s];if((q>=0&&q<=50||q==57)&&ab(j,q)==a)ss.push(s)}
-    if(ss.length>=2)return{j,ss};
+    if(ss.length>=2)groups.push({j,ss});
   }
-  return null;
+  if(!groups.length)return null;
+  groups.sort((x,y)=>y.ss.length-x.ss.length);
+  const gr=groups[0];                                    // the player with the most tokens on the square
+  const able=gr.ss.filter(s=>!(blind[gr.j][s]>0));
+  if(gr.ss.some(s=>stun[gr.j][s]>0)||able.length<2)return null;   // a dizzy token, or blind tokens: no gang-up
+  return{j:gr.j,ss:able};
 }
 async function ambush(i,t,gb,a){
   const c=PATH[a],cx=c[0]+.5,cy=c[1]+.5;
@@ -752,7 +766,17 @@ async function move(i,t){
     }
   }
   ui();
-  if(kicked.length){kick={i,t,v:kicked,t0:performance.now()};hitSound(.4);{const q=cellXY(kicked[0][0],tok[kicked[0][0]][kicked[0][1]]);zoomOn(q[0],q[1],1150)}await sleep(900);for(const[j,s]of kicked)killTok(j,s);kick=null;ui()}
+  if(kicked.length){
+    const cnt={};kicked.forEach(([j])=>{cnt[j]=(cnt[j]||0)+1});
+    kicked.sort((x,y)=>(cnt[y[0]]-cnt[x[0]])||(x[0]-y[0])||((stun[x[0]][x[1]]>0)-(stun[y[0]][y[1]]>0))||(x[1]-y[1]));
+    for(let n=0;n<kicked.length;n++){
+      const v=kicked[n];
+      kick={i,t,v:[v],t0:performance.now()};hitSound(.4);
+      {const q=cellXY(v[0],tok[v[0]][v[1]]);zoomOn(q[0],q[1],1150)}
+      await sleep(900);killTok(v[0],v[1]);kick=null;ui();
+      if(n<kicked.length-1)await sleep(150);
+    }
+  }
   const bi=(p<=50&&!dead)?boxes.findIndex(b=>b.k==(START[i]+p)%52):-1;
   let gift='';
   if(bi>=0){boxes.splice(bi,1);const pk=pickGift(i);
@@ -910,7 +934,7 @@ async function useGift(i,isBot,tt,vj){
         {const q=base(i,tt2);zoomOn(q[0],q[1],2300)}
         eyeSound();await sleep(2200);phase=ph0;
       }
-      hit.forEach(j=>curse[j]=2);safe.forEach(j=>pg[j]=null);ok=true;
+      hit.forEach(j=>curse[j]=2);safe.forEach(j=>pg[j]=null);curse[i]=0;ok=true;
       say('🧿 3in! '+(hit.length?hit.map(j=>NM[j]).join(', ')+' cursed: no number above 3 for two rounds':'Everyone was protected by 5omsa, which is now used up')+(hit.length&&safe.length?` (${safe.map(j=>NM[j]).join(', ')} protected by 5omsa, now used up)`:''));
     }
   }else if(T.behind&&T.behind.d==1){
@@ -961,13 +985,21 @@ function endGame(){
 function resetState(){
   tok=[0,1,2,3].map(()=>[-1,-1,-1,-1]);turn=act.length-1;six=0;mv=[];showDie(0);gifts=[null,null,null,null];pg=[null,null,null,null];curse=[0,0,0,0];blind=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];bags=[[],[],[],[]];slicks=[];boxes=[];fx=[];rc=-1;pend=false;finished=[];warn=[0,0,0,0];warned=[false,false,false,false];stun=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];flip=null;nextN=1;if(mode!=3)inq={};
 }
-function start(m){
+function startGame(kind,n){
   leaveRoom();
-  mode=m;act=(m==0||m==4)?[0,2]:[0,1,2,3];
-  human=[0,1,2,3].map(i=>m==2||m==4||i==0);
+  mode=kind=='cpu'?0:2;
+  act=n==2?[0,2]:n==3?[0,1,2]:[0,1,2,3];
+  human=[0,1,2,3].map(i=>kind=='cpu'?i==0:act.includes(i));
   seed=(Math.random()*2147483647)|0;
   resetState();
   $('menu').classList.add('hide');next(false);
+}
+const SUBS={cpu:['تلعب مع الماكينة',[['<span dir="ltr">1 vs 1</span>',2],['<span dir="ltr">1 vs 2</span>',3],['<span dir="ltr">1 vs 3</span>',4]],'🤖'],local:['تلعبو فرد تليفون',[['2 لاعبين',2],['3 لاعبين',3],['4 لاعبين',4]],'👥']};
+function openSub(kind){
+  const d=SUBS[kind];$('subt').textContent=d[0];
+  $('subb').innerHTML=d[1].map(([l,n])=>`<button class="mb" data-k="${kind}" data-n="${n}" type="button"><i>${d[2]}</i><span><b>${l}</b></span></button>`).join('');
+  $('subb').querySelectorAll('button').forEach(b=>{b.onclick=()=>startGame(b.dataset.k,+b.dataset.n)});
+  $('home').classList.add('hide');$('sub').classList.remove('hide');
 }
 // ---------- online rooms (every player runs the same game; the host orders the actions)
 const SEAT=[0,2,1,3];
@@ -1028,58 +1060,64 @@ function startOnline(c){
   $('menu').classList.add('hide');next(false);
 }
 const lm=t=>{$('lmsg').textContent=t||''};
+const INVITE_URL=location.href.split('#')[0];
+[2,3,4].forEach(v=>{const b=document.createElement('button');b.type='button';b.className='nb';b.textContent=v;b.onclick=()=>{if(room&&amHost())room.presence({n:v})};$('nsel').appendChild(b)});
+function amHost(){return players().some(p=>p.isMe&&p.sameTab&&p.presence.host)}
+function startRoom(n){
+  const ps=players().slice(0,n);if(ps.length<2||!room)return;
+  room.emit('start',{seed:(Math.random()*2147483647)|0,list:ps.map((p,k)=>({peer:p.peer,col:SEAT[k],sex:p.presence.sex?1:0}))});
+}
 function players(){return room?room.peers().filter(p=>p.presence.v==1).sort((a,b)=>(b.presence.host?1:0)-(a.presence.host?1:0)||(a.presence.t||0)-(b.presence.t||0)||(a.peer<b.peer?-1:1)):[]}
 function renderLobby(){
   if(!room||mode==3&&phase!='menu'&&phase!='over')return;
-  const ps=players();
-  $('pl').innerHTML=ps.slice(0,4).map((p,k)=>`<div class="pr"><i style="background:${COL[SEAT[k]]}"></i><span>${NM[SEAT[k]]}${p.isMe&&p.sameTab?' (you)':''}${p.presence.host?' · host':''}</span><span class="fi" style="margin-left:auto">${p.presence.sex?FACE_W:FACE_M}</span></div>`).join('')+(ps.length>4?`<div class="pr">${ps.length-4} waiting (room is full)</div>`:'');
-  const iHost=ps.some(p=>p.isMe&&p.sameTab&&p.presence.host);
-  $('go').style.display=iHost?'':'none';$('go').disabled=ps.length<2;
-  lm(ps.length<2?'Waiting for other players… share the code.':iHost?'Ready! Start when everyone has joined.':'Waiting for the host to start…');
+  const ps=players(),hp=ps.find(p=>p.presence.host),n=Math.max(2,Math.min(4,+(hp&&hp.presence.n)||2)),iHost=ps.some(p=>p.isMe&&p.sameTab&&p.presence.host);
+  $('pl').innerHTML=ps.map((p,k)=>k<n?`<div class="pr"><i style="background:${COL[SEAT[k]]}"></i><span>${NM[SEAT[k]]}${p.isMe&&p.sameTab?' (إنت)':''}${p.presence.host?' · مول اللمة':''}</span><span class="fi" style="margin-left:auto">${p.presence.sex?FACE_W:FACE_M}</span></div>`:'').join('')+(ps.length>n?`<div class="pr">${ps.length-n} في الإنتظار</div>`:'');
+  [...$('nsel').children].forEach((b,k)=>{b.classList.toggle('on',2+k==n);b.disabled=!iHost});
+  lm(ps.length<n?`في انتظار اللاعبين… ${ps.length}/${n}`:'الكل واجد! نبداو…');
+  if(iHost&&ps.length>=n&&!startSent){startSent=true;startRoom(n)}
 }
 function onStart(m){
   const d=m.data;if(!d||!Array.isArray(d.list)||!room)return;
   const hp=room.peers().find(p=>p.peer==m.peer);if(!hp||!hp.presence.host)return;
   if(mode==3&&phase!='menu'&&phase!='over')return;
   const my=room.peers().find(p=>p.isMe&&p.sameTab),k=d.list.findIndex(x=>my&&x.peer==my.peer);
-  if(k<0){lm('A game is already running in this room.');return}
+  if(k<0){lm('اللعبة بدات في اللمة هذي.');return}
   for(const x of d.list)if(typeof x.col!='number'||x.col<0||x.col>3)return;
   startOnline({seed:d.seed,list:d.list,k});
 }
 function leaveRoom(){if(room){try{room.leave()}catch(e){}room=null}inq={};}
 function showHome(over){
-  $('home').classList.remove('hide');$('lob').classList.add('hide');$('l1').classList.remove('hide');$('l2').classList.add('hide');lm('');
+  $('home').classList.remove('hide');$('sub').classList.add('hide');$('lob').classList.add('hide');$('l1').classList.remove('hide');$('l2').classList.add('hide');lm('');
   if(!over){$('mt').textContent='Blido King';$('ms').textContent=''}
 }
 const genCode=()=>{const A='abcdefghjkmnpqrstuvwxyz23456789';let c='';for(let k=0;k<5;k++)c+=A[Math.floor(Math.random()*A.length)];return c};
 async function joinRoom(code,create){
-  lm('Connecting…');
+  lm('نتّصلو…');
   let r=null;
   try{r=window.claude&&await claude.use('room')}catch(e){}
-  if(!r){lm('Online rooms are not available here. Open the game inside Claude, shared with the other players (Contributor access).');return}
+  if(!r){lm('اللعب أونلاين موش متوفر هنا. حل اللعبة من Claude وشاركها مع اللاعبين.');return}
   try{
     leaveRoom();
     room=await r.join('blido-'+code);
     rcode=code;mode=0;phase='menu';
     room.on('req',onReq);room.on('ord',onOrd);room.on('start',onStart);
     room.onPeers(renderLobby);
-    await room.presence({v:1,t:Date.now(),host:create?1:0,sex:mySex});
+    startSent=false;await room.presence({v:1,t:Date.now(),host:create?1:0,sex:mySex,...(create?{n:2}:{})});
     $('rc').textContent=code.toUpperCase();$('l1').classList.add('hide');$('l2').classList.remove('hide');upMy();renderLobby();
-  }catch(e){room=null;lm(e&&e.message=='connect'?'Could not reach the game server. Try again in a moment.':e&&e.code=='limit_reached'?'This room is full.':'Could not join this room. Check the code and try again.')}
+  }catch(e){room=null;lm(e&&e.message=='connect'?'ما نجمناش نتّصلو بالسيرفر. عاود بعد شوية.':e&&e.code=='limit_reached'?'اللمة عامرة.':'ما نجمناش ندخلو للمة. ثبّت في الكود وعاود.')}
 }
 $('onl').onclick=()=>{$('home').classList.add('hide');$('lob').classList.remove('hide');lm('')};
 $('lback').onclick=()=>{leaveRoom();showHome()};
 $('mk').onclick=()=>joinRoom(genCode(),true);
-$('jn').onclick=()=>{const c=$('cd').value.trim().toLowerCase();if(!/^[a-z0-9]{3,8}$/.test(c)){lm('Enter a valid room code.');return}joinRoom(c,false)};
+$('jn').onclick=()=>{const c=$('cd').value.trim().toLowerCase();if(!/^[a-z0-9]{3,8}$/.test(c)){lm('حط كود صحيح.');return}joinRoom(c,false)};
 $('inv').onclick=async()=>{
-  const t=`Join my Blido King room! Code: ${rcode.toUpperCase()}. Open ${location.href.split('#')[0]}, tap “Create or join a room” and enter the code.`;
-  try{await navigator.clipboard.writeText(t);lm('Invite copied! Send it to your friends.')}catch(e){lm(t)}
+  const t=`هيا نلعبو Blido King! الكود: ${rcode.toUpperCase()}. حل ${INVITE_URL} وكبس على «تلعبو كل واحد في تليفونو» وحط الكود.`;
+  try{await navigator.clipboard.writeText(t);lm('تنسخت الدعوة! ابعثها لصحابك.')}catch(e){lm(t)}
 };
-$('go').onclick=()=>{
-  const ps=players().slice(0,4);if(ps.length<2||!room)return;
-  room.emit('start',{seed:(Math.random()*2147483647)|0,list:ps.map((p,k)=>({peer:p.peer,col:SEAT[k],sex:p.presence.sex?1:0}))});
-};
-document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>start(+b.dataset.m));
+$('bM').onclick=()=>openSub('cpu');$('bF').onclick=()=>openSub('local');
+$('subback').onclick=()=>showHome();
+$('ex').onclick=()=>{try{window.close()}catch(e){}setTimeout(()=>$('bye').classList.remove('hide'),150)};
+$('byeb').onclick=()=>$('bye').classList.add('hide');
 $('rkb').onclick=()=>{$('rk').classList.add('hide');leaveRoom();showHome();$('ms').textContent='تعاود ؟';$('menu').classList.remove('hide')};
 $('die').onclick=()=>{if(human[cur()]&&mine(cur())&&phase=='roll'&&!pend)sendAct({t:'roll',p:cur()})};
 cv.addEventListener('click',e=>{
